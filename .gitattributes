@@ -6,3 +6,6 @@
 *.yml text
 go.mod text
 go.sum text
+
+# Wire-format fixtures keep their CRLF line ends on every platform.
+*.eml -text

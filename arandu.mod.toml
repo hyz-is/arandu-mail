@@ -1,21 +1,23 @@
 # What this package declares about itself.
 #
-# The declaration is capability, not intent, and `aru doctor` compares it with
-# what the code imports and calls. A package that says it makes no outbound
-# calls and then holds an HTTP client is rejected, which is what makes the
-# four lines below worth reading before installing anything.
+# The declaration is capability, not intent. `aru doctor` reads the application
+# and never opens an installed package, so tests/Unit/audit_test.go is what
+# compares these four lines with what the code calls.
 
-name = ":author_username/:module_slug"
-framework = ">= 0.71"
+name = "hyz-is/mail"
+# This package imports no framework package and no Hesape package: the floor is
+# the Framework release the package template was cut from, and it moves only
+# when a release of this package needs a newer one.
+framework = ">= 0.66"
 profiles = ["conventional", "performance"]
 
 [permissions]
-# It answers requests and reads its own rows. Nothing leaves the process.
-network = false
-# It keeps no state outside the database.
+# dnsauth asks DNS resolvers for the records it checks and fetches an MTA-STS
+# policy over HTTPS. Every other package here stays in the process.
+network = true
+# It reads no file and writes none; messages and keys arrive as arguments.
 filesystem = false
 # It runs no other program.
 exec = false
-# module.go owns the skeletons table, so whoever installs this has to run
-# `aru migrate`. Declaring it is how they find that out before deploying.
-migrations = true
+# It owns no table: the records it builds are stored by the application.
+migrations = false
