@@ -548,3 +548,19 @@ func TestQuotedPrintableAgreesWithTheStandardLibrary(t *testing.T) {
 		}
 	}
 }
+
+// A file name that would put a part header past 998 octets is refused, found
+// by the fuzzer with a long run of spaces.
+func TestOverlongAttachmentNamesAreRefused(t *testing.T) {
+	long := "0" + strings.Repeat(" ", 990)
+	_, err := baseBuilder().Text("x").Attach(amime.Attachment{Filename: long, Content: []byte("x")}).Build()
+	if !errors.Is(err, amime.ErrLineTooLong) {
+		t.Errorf("error = %v", err)
+	}
+	if _, err := baseBuilder().Text("x").Attach(amime.Attachment{Filename: strings.Repeat("a", 255), Content: []byte("x")}).Build(); err != nil {
+		t.Errorf("a 255-byte name: %v", err)
+	}
+	if _, err := baseBuilder().Text("x").Attach(amime.Attachment{ContentType: "a/" + strings.Repeat("b", 300), Content: []byte("x")}).Build(); !errors.Is(err, amime.ErrLineTooLong) {
+		t.Errorf("long content type: %v", err)
+	}
+}

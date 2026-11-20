@@ -189,7 +189,8 @@ func (b *Builder) Text(s string) *Builder { b.text = s; return b }
 func (b *Builder) HTML(s string) *Builder { b.html = s; return b }
 
 // Attach adds a file. An attachment with a ContentID is an inline image of the
-// HTML body.
+// HTML body. A file name over 255 bytes or a content type over 200 is refused
+// with ErrLineTooLong.
 func (b *Builder) Attach(a Attachment) *Builder {
 	if a.ContentType != "" && !validContentType(a.ContentType) {
 		b.fail(fmt.Errorf("%w: %q", ErrInvalidContentType, a.ContentType))
@@ -197,6 +198,12 @@ func (b *Builder) Attach(a Attachment) *Builder {
 	}
 	if err := checkText("attachment filename", a.Filename); err != nil {
 		b.fail(err)
+		return b
+	}
+	// A file name and a type longer than any file system or registry allows would
+	// put a header line past the limit with no place to fold it.
+	if len(a.Filename) > 255 || len(a.ContentType) > 200 {
+		b.fail(fmt.Errorf("%w: attachment file name or content type", ErrLineTooLong))
 		return b
 	}
 	if a.ContentID != "" && !validContentID(a.ContentID) {
