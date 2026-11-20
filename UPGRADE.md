@@ -1,5 +1,5 @@
 # Upgrade Guide
 
-## Unreleased
+## v0.1.0
 
-Nothing to upgrade from: no version of this module has been tagged.
+Nothing to upgrade from: this is the first release.
